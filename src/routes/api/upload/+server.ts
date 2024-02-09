@@ -30,13 +30,14 @@ function runWorkerThread(image: File, imagesArray: File[], videosArray: File[], 
   });
 }
 import { getStorage, ref, uploadBytes } from "firebase/storage";
+import { app } from '$lib/firebase';
 
 
 
 async function uploadFile(code: string, fileName: string, file: Blob) {
 
   // Create a root reference
-  const storage = getStorage();
+  const storage = getStorage(app);
 
   // Create a reference to 'mountains.jpg'
   const folderRef = ref(storage, `uploads/${code}/${fileName}`);
