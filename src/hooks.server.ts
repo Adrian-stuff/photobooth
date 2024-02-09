@@ -5,6 +5,8 @@ export const handle: Handle = async ({ event, resolve }) => {
     if (event.url.pathname.startsWith('/camera')) { return redirect(301, '/'); }
     if (event.url.pathname.startsWith('/frames')) { return redirect(301, '/'); }
     if (event.url.pathname.startsWith('/uploads')) { return redirect(301, '/'); }
+    if (event.url.pathname.startsWith('/print')) { return redirect(301, '/'); }
+    if (event.url.pathname.startsWith('/frames')) { return redirect(301, '/'); }
     if (event.url.pathname.startsWith('/api')) { return redirect(301, '/'); }
   }
 
