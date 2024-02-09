@@ -10,4 +10,7 @@ declare global {
 	}
 }
 
-export {};
+
+export { };
+
+
