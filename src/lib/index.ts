@@ -3,6 +3,8 @@ export interface FrameType {
   frames: number
   frameUrl: string
   width: number
+  height: number
+
   coordinates: { x: number, y: number }[]
 }
 interface FrameInfo {
@@ -14,6 +16,7 @@ export const framesInfo: FrameInfo = {
     frameUrl: `frames/1.png`,
 
     width: 664,
+    height: 424,
     coordinates: [
       { x: 67, y: 358 },
       { x: 67, y: 849 },
@@ -23,15 +26,39 @@ export const framesInfo: FrameInfo = {
   },
   "frame-2": {
     frames: 3,
-    frameUrl: `frames/5.png`,
-    width: 666,
+    frameUrl: `frames/1.png`,
+    width: 520,
+    height: 424,
+
     coordinates: [
-      { x: 68, y: 80 },
-      { x: 68, y: 607 },
-      { x: 68, y: 1135 }
+      { x: 13, y: 90 },
+      { x: 13, y: 550 },
+      { x: 13, y: 1013 }
     ]
   },
+  "frame-3": {
+    frames: 3,
+    frameUrl: `frames/2.png`,
+    width: 520,
+    height: 424,
 
+    coordinates: [
+      { x: 13, y: 90 },
+      { x: 13, y: 550 },
+      { x: 13, y: 1013 }
+    ]
+  }, "frame-4": {
+    frames: 3,
+    frameUrl: `frames/3.png`,
+    width: 520,
+    height: 424,
+
+    coordinates: [
+      { x: 13, y: 90 },
+      { x: 13, y: 550 },
+      { x: 13, y: 1013 }
+    ]
+  },
 }
 
 // place files you want to import through the `$lib` alias in this folder.

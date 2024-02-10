@@ -6,11 +6,12 @@
 	let imageDownloadURL: string;
 	let videoDownloadURL: string;
 	let error: string = '';
-
+	let loading = false;
 	async function onSubmit() {
 		if (code.length !== 6) return;
 		console.log(code);
 		error = '';
+		loading = true;
 		const storage = getStorage(app);
 		try {
 			videoDownloadURL = await getDownloadURL(ref(storage, `uploads/${code}/final.mp4`));
@@ -20,6 +21,7 @@
 			error = 'Invalid Code';
 		}
 		code = '';
+		loading = false;
 	}
 </script>
 
@@ -27,7 +29,11 @@
 <body>
 	<div class="container">
 		<form on:submit|preventDefault={onSubmit}>
-			<h1>Enter Code</h1>
+			{#if loading}
+				<h1>Downloading...</h1>
+			{:else}
+				<h1>Enter Code</h1>
+			{/if}
 			<div>
 				<input bind:value={code} type="text" minlength="6" maxlength="6" />
 				<button type="submit">Enter</button>

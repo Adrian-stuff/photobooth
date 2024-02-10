@@ -10,10 +10,16 @@ function runWorkerThread(image: File, imagesArray: File[], videosArray: File[], 
     const worker = new Worker('./src/routes/api/upload/workerScript.js', { workerData: { image, imagesArray, videosArray, uuid, frameData } });
 
     worker.on('message', async (message) => {
-      const imageFile = new Blob([await readFile(`static/uploads/${uuid}/image.png`)])
-      const videoFile = new Blob([await readFile(`static/uploads/${uuid}/final.mp4`)])
-      await uploadFile(uuid, "image.png", imageFile)
-      await uploadFile(uuid, "final.mp4", videoFile)
+      try {
+        const imageFile = new Blob([await readFile(`static/uploads/${uuid}/image.png`)])
+        const videoFile = new Blob([await readFile(`static/uploads/${uuid}/final.mp4`)])
+
+        await uploadFile(uuid, "image.png", imageFile)
+        await uploadFile(uuid, "final.mp4", videoFile)
+      } catch (error) {
+        await db.push(`/failed[]`, uuid, true)
+        console.log(`image ${uuid} did not upload`)
+      }
 
       resolve(message);
     });

@@ -80,15 +80,27 @@
 
 		await ffmpeg.exec([
 			'-i',
+			'frame.png', // Input background image
+			'-i',
 			'0.png', // Input JPEG image 0
 			'-i',
 			'1.png', // Input JPEG image 1
 			'-i',
 			'2.png', // Input JPEG image 2
-			'-i',
-			'frame.png', // Input background image
 			'-filter_complex',
-			`[0:v]scale=664:-1[v0];[1:v]scale=664:-1[v1];[2:v]scale=664:-1[v2];[3:v][v0]overlay=x=${frameData.coordinates[0].x}:y=${frameData.coordinates[0].y}[v4];[v4][v1]overlay=x=${frameData.coordinates[1].x}:y=${frameData.coordinates[1].y}[v5];[v5][v2]overlay=x=${frameData.coordinates[2].x}:y=${frameData.coordinates[2].y}[v6];[v6][3:v]overlay=x=0:y=0[v7]`,
+			`[1:v]scale=-1:${frameData.height}[v1];[2:v]scale=-1:${frameData.height}[v2];[3:v]scale=-1:${frameData.height}[v3];` +
+				`[0:v][v1]overlay=x=${frameData.coordinates[0].x}:y=${frameData.coordinates[0].y}[v4]` +
+				// `[v4][v2]overlay=x=${frameData.coordinates[1].x}:y=${frameData.coordinates[1].y}[v5];` +
+				// `[v5][v3]overlay=x=${frameData.coordinates[2].x}:y=${frameData.coordinates[2].y}[v6];` +
+				frameData.coordinates
+					.map((coord, i) => {
+						if (i === 0) {
+							return;
+						}
+						return `[v${i + 3}][v${i + 1}]overlay=x=${coord.x}:y=${coord.y}[v${i + 4}]`;
+					})
+					.join(';') +
+				`;[v6][0:v]overlay=x=0:y=0[v7]`,
 			'-map',
 			'[v7]', // Map the final overlay stream
 			'-y',

@@ -18,16 +18,21 @@ export function generateVideo(code, frameData) {
 				'-i',
 				`static/uploads/${code}/video-2.webm`, // Input video 2
 				'-filter_complex',
-				`[1:v]scale=${frameData.width}:-1[v0];` + // Scale video 0 to 200x180
-					`[2:v]scale=${frameData.width}:-1[v1];` + // Scale video 1 to 200x180
-					`[3:v]scale=${frameData.width}:-1[v2];` + // Scale video 2 to 200x180
-					`[0:v][v0]overlay=x=${frameData.coordinates[0].x}:y=${frameData.coordinates[0].y}[v3];` + // Overlay scaled video 0 on the background
-					`[v3][v1]overlay=x=${frameData.coordinates[1].x}:y=${frameData.coordinates[1].y}[v4];` + // Overlay scaled video 1 on the result
-					`[v4][v2]overlay=x=${frameData.coordinates[2].x}:y=${frameData.coordinates[2].y}[v5];` + // Overlay scaled video 2 on the result
-					'[v5][0:v]overlay=x=0:y=0[v6]', // TODO: maybe add more fps
-				// "[v6]fps=50,split[s0][s1];[s0]palettegen[p];[s1][p]paletteuse[final]", // Apply framerate, split, generate palette, and apply palette
+				`[1:v]scale=-1:${frameData.height}[v1];` + // Scale video 0 to 200x180
+					`[2:v]scale=-1:${frameData.height}[v2];` + // Scale video 1 to 200x180
+					`[3:v]scale=-1:${frameData.height}[v3];` + // Scale video 2 to 200x180
+					`[0:v][v1]overlay=x=${frameData.coordinates[0].x}:y=${frameData.coordinates[0].y}[v4]` + // Overlay scaled video 0 on the background
+					frameData.coordinates
+						.map((coord, i) => {
+							if (i === 0) {
+								return;
+							}
+							return `[v${i + 3}][v${i + 1}]overlay=x=${coord.x}:y=${coord.y}[v${i + 4}]`;
+						})
+						.join(';') +
+					';[v6][0:v]overlay=x=0:y=0[v7]', // TODO: maybe add more fps
 				'-map',
-				'[v6]',
+				'[v7]',
 				'-y',
 				`static/uploads/${code}/out.mp4`
 			]);
