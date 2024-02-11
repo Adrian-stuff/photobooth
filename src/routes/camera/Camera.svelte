@@ -74,3 +74,9 @@
 </script>
 
 <video bind:this={video} playsinline autoplay muted></video>
+
+<style>
+	video {
+		transform: rotateY(180deg);
+	}
+</style>

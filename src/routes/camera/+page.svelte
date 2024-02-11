@@ -11,7 +11,7 @@
 	import { io } from 'socket.io-client';
 	const socket = io();
 
-	import { blobToBase64, framesInfo } from '$lib';
+	import { framesInfo } from '$lib';
 	let camera: Camera;
 	let timer: CountdownTimer;
 	let previewImage: string;
@@ -20,6 +20,14 @@
 	let isRunning = false;
 	let ffmpeg: FFmpeg;
 	let frameType = 'frame-2';
+	let frame1Type = '1';
+	let frame2Type = '2';
+	let frames: number;
+	$: frames = framesInfo[frameType].frames;
+	let frameSelection = Object.keys(framesInfo);
+	let frameSpotifySelection = Object.keys(
+		framesInfo['spotify'].frameTypes !== undefined ? framesInfo['spotify'].frameTypes : ''
+	);
 	// $: imageGenerated = $finalImage;
 	if (browser) {
 		ffmpeg = new FFmpeg();
@@ -32,7 +40,7 @@
 
 	videosBlobArray.subscribe((val) => {
 		console.log('blob Array', val);
-		if ($videosBlobArray.length === 3) {
+		if ($videosBlobArray.length === frames) {
 			generateImage();
 		}
 	});
@@ -70,26 +78,50 @@
 
 	async function generateImage() {
 		const frameData = framesInfo[frameType];
-		await ffmpeg.writeFile(
-			'frame.png',
-			await fetchFile(`${window.location.origin}/${frameData.frameUrl}`)
-		);
-		await ffmpeg.writeFile(`0.png`, await fetchFile($imagesBlobArray[0]));
-		await ffmpeg.writeFile(`1.png`, await fetchFile($imagesBlobArray[1]));
-		await ffmpeg.writeFile(`2.png`, await fetchFile($imagesBlobArray[2]));
 
+		if (frameData.useDiff) {
+			let frameSpotifyData = frameData.frameTypes;
+
+			if (frameSpotifyData !== undefined) {
+				await ffmpeg.writeFile(
+					'frame1.png',
+					await fetchFile(`${window.location.origin}/${frameSpotifyData[frame1Type].frameUrl}`)
+				);
+				await ffmpeg.writeFile(
+					'frame2.png',
+					await fetchFile(`${window.location.origin}/${frameSpotifyData[frame2Type].frameUrl}`)
+				);
+			}
+		} else {
+			await ffmpeg.writeFile(
+				'frame.png',
+				await fetchFile(`${window.location.origin}/${frameData.frameUrl}`)
+			);
+		}
+		let imageArgs = [];
+		let scaleArgs = [];
+		let increment = 1;
+		if (frameData.useDiff) {
+			scaleArgs.push('[0:v]scale=1488:1050[v0];');
+			increment = 2;
+		}
+		for (let index = 0; index < $imagesBlobArray.length; index++) {
+			imageArgs.push(`-i`);
+			imageArgs.push(`${index}.png`);
+			await ffmpeg.writeFile(`${index}.png`, await fetchFile($imagesBlobArray[index]));
+			scaleArgs.push(
+				`[${index + increment}:v]scale=${frameData.width}:${frameData.height}[v${index + increment}];`
+			);
+		}
+		// ...(frameData.useDiff ? ['frame1.png', '-i', 'frame2.png'] : ['frame.png']), // Input background image
 		await ffmpeg.exec([
 			'-i',
-			'frame.png', // Input background image
-			'-i',
-			'0.png', // Input JPEG image 0
-			'-i',
-			'1.png', // Input JPEG image 1
-			'-i',
-			'2.png', // Input JPEG image 2
+			...(frameData.useDiff ? ['frame1.png', '-i', 'frame2.png'] : ['frame.png']), // Input background image
+
+			...imageArgs,
 			'-filter_complex',
-			`[1:v]scale=-1:${frameData.height}[v1];[2:v]scale=-1:${frameData.height}[v2];[3:v]scale=-1:${frameData.height}[v3];` +
-				`[0:v][v1]overlay=x=${frameData.coordinates[0].x}:y=${frameData.coordinates[0].y}[v4]` +
+			scaleArgs.join('') +
+				`[${frameData.useDiff ? 'v0' : '0:v'}][v${increment}]overlay=x=${frameData.coordinates[0].x}:y=${frameData.coordinates[0].y}[v5]` +
 				// `[v4][v2]overlay=x=${frameData.coordinates[1].x}:y=${frameData.coordinates[1].y}[v5];` +
 				// `[v5][v3]overlay=x=${frameData.coordinates[2].x}:y=${frameData.coordinates[2].y}[v6];` +
 				frameData.coordinates
@@ -97,16 +129,17 @@
 						if (i === 0) {
 							return;
 						}
-						return `[v${i + 3}][v${i + 1}]overlay=x=${coord.x}:y=${coord.y}[v${i + 4}]`;
+						return `[v${i + 4}][v${i + increment}]overlay=x=${coord.x}:y=${coord.y}[v${i + 4 + increment}]`;
 					})
 					.join(';') +
-				`;[v6][0:v]overlay=x=0:y=0[v7]`,
+				(frameData.useDiff
+					? `;[v7][0:v]overlay=x=0:y=0[v8];[v8][1:v]overlay=x=744:y=0[v10]`
+					: `;[v7][0:v]overlay=x=0:y=0[v10]`),
 			'-map',
-			'[v7]', // Map the final overlay stream
+			'[v10]', // Map the final overlay stream
 			'-y',
 			'out.png' // Output PNG file
 		]);
-
 		const data: any = await ffmpeg.readFile(`out.png`);
 
 		const url = URL.createObjectURL(new Blob([data.buffer], { type: 'image/png' }));
@@ -127,6 +160,9 @@
 		const formData = new FormData();
 		formData.append('frameType', frameType);
 		formData.append('image', url);
+		formData.append('frame1', frame1Type);
+		formData.append('frame2', frame2Type);
+
 		videosBlobArray.map((val, index) => {
 			formData.append(`video-${index}`, val);
 		});
@@ -144,11 +180,11 @@
 		camera.stopRecording();
 		camera.captureImage();
 		$count = $count + 1;
-		if ($count < 3) {
+		if ($count < frames) {
 			startCapturing();
 			console.log('sup');
 		}
-		if ($count === 3) {
+		if ($count === frames) {
 			timer.stopCountdown();
 			$count = 0;
 		}
@@ -205,6 +241,33 @@
 				{/each}
 			{:else}
 				<img src={$finalImage} alt="" />
+			{/if}
+		</div>
+		<div>
+			<select bind:value={frameType}>
+				{#each frameSelection as frameStyle}
+					<option value={frameStyle}>
+						{frameStyle}
+					</option>
+				{/each}
+			</select>
+			{#if frameType === 'spotify'}
+				<div>
+					<select bind:value={frame1Type}>
+						{#each frameSpotifySelection as spotifyFrameStyle}
+							<option value={spotifyFrameStyle}>
+								{spotifyFrameStyle}
+							</option>
+						{/each}
+					</select>
+					<select bind:value={frame2Type}>
+						{#each frameSpotifySelection as spotifyFrameStyle}
+							<option value={spotifyFrameStyle}>
+								{spotifyFrameStyle}
+							</option>
+						{/each}
+					</select>
+				</div>
 			{/if}
 		</div>
 	</div>

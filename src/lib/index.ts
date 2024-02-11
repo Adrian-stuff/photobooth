@@ -4,8 +4,12 @@ export interface FrameType {
   frameUrl: string
   width: number
   height: number
-
+  useDiff: boolean
+  frameTypes?: SpotifyType
   coordinates: { x: number, y: number }[]
+}
+interface SpotifyType {
+  [key: string]: { frameUrl: string }
 }
 interface FrameInfo {
   [key: string]: FrameType;
@@ -14,8 +18,8 @@ export const framesInfo: FrameInfo = {
   "frame-1": {
     frames: 3,
     frameUrl: `frames/1.png`,
-
-    width: 664,
+    useDiff: false,
+    width: -1,
     height: 424,
     coordinates: [
       { x: 67, y: 358 },
@@ -27,9 +31,9 @@ export const framesInfo: FrameInfo = {
   "frame-2": {
     frames: 3,
     frameUrl: `frames/1.png`,
-    width: 520,
+    useDiff: false,
+    width: -1,
     height: 424,
-
     coordinates: [
       { x: 13, y: 90 },
       { x: 13, y: 550 },
@@ -39,24 +43,44 @@ export const framesInfo: FrameInfo = {
   "frame-3": {
     frames: 3,
     frameUrl: `frames/2.png`,
-    width: 520,
+    useDiff: false,
+    width: -1,
     height: 424,
-
     coordinates: [
       { x: 13, y: 90 },
       { x: 13, y: 550 },
       { x: 13, y: 1013 }
     ]
-  }, "frame-4": {
+  },
+  "frame-4": {
     frames: 3,
     frameUrl: `frames/3.png`,
-    width: 520,
+    useDiff: false,
+    width: -1,
     height: 424,
-
     coordinates: [
       { x: 13, y: 90 },
       { x: 13, y: 550 },
       { x: 13, y: 1013 }
+    ]
+  },
+  "spotify": {
+    frames: 2,
+    frameUrl: `frames/1.png`,
+    useDiff: true,
+    frameTypes: {
+      "pasilyo": {
+        frameUrl: `frames/spotify/pasilyo.png`,
+      },
+      "until": {
+        frameUrl: `frames/spotify/until.png`,
+      }
+    },
+    width: -1,
+    height: 578,
+    coordinates: [
+      { x: 65, y: 112 },
+      { x: 65 + 744, y: 112 },
     ]
   },
 }

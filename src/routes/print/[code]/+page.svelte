@@ -18,16 +18,19 @@
 	<div class="print-container">
 		<img
 			bind:this={image}
-			class="image print-image"
+			class={`image another-image ${data.frameData.frameType === 'spotify' ? 'spotify' : 'print-image'}`}
 			src={`/uploads/${data.code}/image.png`}
 			alt=""
 		/>
-		<img
-			bind:this={image}
-			class="image print-image"
-			src={`/uploads/${data.code}/image.png`}
-			alt=""
-		/>
+		{#if data.frameData.frameType !== 'spotify'}
+			<!-- content here -->
+			<img
+				bind:this={image}
+				class="image print-image"
+				src={`/uploads/${data.code}/image.png`}
+				alt=""
+			/>
+		{/if}
 	</div>
 	<div class="bottom-container no-print">
 		<h1 class="no-print">{data.code}</h1>
@@ -35,10 +38,12 @@
 			<button class="no-print" on:click={() => window.print()}>Print</button>
 		</div>
 	</div>
-	<div class="video-preview no-print">
-		<!-- svelte-ignore a11y-media-has-caption -->
-		<video src={`/uploads/${data.code}/final.mp4`} autoplay loop></video>
-	</div>
+	{#if data.frameData.frameType !== 'spotify'}
+		<div class="video-preview no-print">
+			<!-- svelte-ignore a11y-media-has-caption -->
+			<video src={`/uploads/${data.code}/final.mp4`} autoplay loop></video>
+		</div>
+	{/if}
 </div>
 
 <!-- <h1>{data.content}</h1> -->

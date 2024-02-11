@@ -4,35 +4,55 @@ import { workerData, parentPort } from 'worker_threads';
 /**
  * @param {string} code
  * @param {import('$lib').FrameType} frameData
+ * @param {string[] | undefined} frameSpotify
  */
-export function generateVideo(code, frameData) {
+export function generateVideo(code, frameData, frameSpotify) {
 	return /** @type {Promise<void>} */ (
 		new Promise(async (resolve, reject) => {
+			let imageArgs = [];
+			let scaleArgs = [];
+			let increment = 1;
+			if (frameData.useDiff) {
+				// scaleArgs.push('');
+				scaleArgs.push('[0:v]scale=1488:1050[v0];');
+
+				increment = 2;
+			}
+			for (let index = 0; index < frameData.frames; index++) {
+				imageArgs.push(`-i`);
+				imageArgs.push(`static/uploads/${code}/video-${index}.webm`);
+				scaleArgs.push(
+					`[${index + increment}:v]scale=${frameData.width}:${frameData.height}[v${index + increment}];`
+				);
+			}
+
 			const ffmpegProcess = spawn('ffmpeg', [
 				'-i',
-				`static/${frameData.frameUrl}`,
-				'-i',
-				`static/uploads/${code}/video-0.webm`, // Input video 0
-				'-i',
-				`static/uploads/${code}/video-1.webm`, // Input video 1
-				'-i',
-				`static/uploads/${code}/video-2.webm`, // Input video 2
+				...(frameData.useDiff && frameData.frameTypes && frameSpotify
+					? [
+							`static/${frameData.frameTypes[frameSpotify[0]].frameUrl}`,
+							'-i',
+							`static/${frameData.frameTypes[frameSpotify[1]].frameUrl}`
+						]
+					: [`static/${frameData.frameUrl}`]), // Input background image
+
+				...imageArgs,
 				'-filter_complex',
-				`[1:v]scale=-1:${frameData.height}[v1];` + // Scale video 0 to 200x180
-					`[2:v]scale=-1:${frameData.height}[v2];` + // Scale video 1 to 200x180
-					`[3:v]scale=-1:${frameData.height}[v3];` + // Scale video 2 to 200x180
-					`[0:v][v1]overlay=x=${frameData.coordinates[0].x}:y=${frameData.coordinates[0].y}[v4]` + // Overlay scaled video 0 on the background
+				scaleArgs.join('') +
+					`[${frameData.useDiff ? 'v0' : '0:v'}][v${increment}]overlay=x=${frameData.coordinates[0].x}:y=${frameData.coordinates[0].y}[v5]` + // Overlay scaled video 0 on the background
 					frameData.coordinates
 						.map((coord, i) => {
 							if (i === 0) {
 								return;
 							}
-							return `[v${i + 3}][v${i + 1}]overlay=x=${coord.x}:y=${coord.y}[v${i + 4}]`;
+							return `[v${i + 4}][v${i + increment}]overlay=x=${coord.x}:y=${coord.y}[v${i + 4 + increment}]`;
 						})
 						.join(';') +
-					';[v6][0:v]overlay=x=0:y=0[v7]', // TODO: maybe add more fps
+					(frameData.useDiff
+						? `;[v7][0:v]overlay=x=0:y=0[v8];[v8][1:v]overlay=x=744:y=0[v10]`
+						: `;[v7][0:v]overlay=x=0:y=0[v10]`),
 				'-map',
-				'[v7]',
+				'[v10]',
 				'-y',
 				`static/uploads/${code}/out.mp4`
 			]);
@@ -123,6 +143,8 @@ export function generateStillVideo(code) {
 				'30',
 				'-i',
 				`static/uploads/${code}/image.png`, // Input video 0
+				'-vf',
+				'scale=1488:1050:force_original_aspect_ratio=decrease,pad=1488:1050:(ow-iw)/2:(oh-ih)/2,setsar=1',
 				'-c:v',
 				'libx264',
 				'-t',
@@ -162,12 +184,19 @@ export function generateStillVideo(code) {
 (async () => {
 	const frameData = workerData.frameData;
 	const uuid = workerData.uuid;
+	const frameSpotifyData = workerData.frameSpotifyData;
 	console.log('frame', workerData);
-	await generateVideo(uuid, frameData);
+	if (frameData.useDiff) {
+		await parentPort?.postMessage('done');
+		return;
+	}
+	await generateVideo(uuid, frameData, frameSpotifyData);
 	await generateStillVideo(uuid);
 	await concatVideo(uuid);
 	await unlink(`static/uploads/${uuid}/still.mp4`);
 	await unlink(`static/uploads/${uuid}/out.mp4`);
 
 	await parentPort?.postMessage('done');
-})();
+})().catch(async (e) => {
+	await parentPort?.postMessage('done');
+});

@@ -5,9 +5,9 @@ import { Worker } from "worker_threads"
 import { framesInfo } from '$lib';
 const address = "http://localhost:5173"
 
-function runWorkerThread(image: File, imagesArray: File[], videosArray: File[], uuid: string, frameData: FrameType) {
+function runWorkerThread(image: File, imagesArray: File[], videosArray: File[], uuid: string, frameData: FrameType, frameSpotifyData?: string[]) {
   return new Promise((resolve, reject) => {
-    const worker = new Worker('./src/routes/api/upload/workerScript.js', { workerData: { image, imagesArray, videosArray, uuid, frameData } });
+    const worker = new Worker('./src/routes/api/upload/workerScript.js', { workerData: { image, imagesArray, videosArray, uuid, frameData, frameSpotifyData } });
 
     worker.on('message', async (message) => {
       try {
@@ -59,6 +59,10 @@ export async function POST({ request }: RequestEvent) {
   const image = formData.image as File
   const frameData = framesInfo[frameType]
   console.log(framesInfo[frameType])
+  let frameSpotifyData: string[] | undefined;
+  if (frameData.useDiff) {
+    frameSpotifyData = [formData.frame1, formData.frame2] as string[]
+  }
   const videosArray: File[] = []
   const imagesArray: File[] = []
 
@@ -106,7 +110,7 @@ export async function POST({ request }: RequestEvent) {
   // await generateVideo(uuid, frameUrl)
   // await generateStillVideo(uuid)
   // await concatVideo(uuid)
-  runWorkerThread(image, imagesArray, videosArray, uuid, frameData)
+  runWorkerThread(image, imagesArray, videosArray, uuid, frameData, frameSpotifyData)
 
   await db.push(`/uploads/${uuid}`, { code: uuid, frameType: frameType, frames: frameData.frames })
 

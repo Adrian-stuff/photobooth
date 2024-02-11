@@ -1,6 +1,9 @@
+.spotify {
+	width: 50vw !important;
+}
 .print-image {
 	margin: 0;
-	border: 1px dotted black;
+	/* border: 1px dotted black; */
 	width: 250px;
 }
 .container {
@@ -51,6 +54,7 @@ button:focus-visible {
 	.print-container {
 		display: flex;
 		flex-direction: row;
+		/* grid-template-rows: 1fr 1fr; */
 		gap: 0;
 		margin: 0;
 		padding: 0;
@@ -60,8 +64,15 @@ button:focus-visible {
 	}
 	.print-image {
 		margin: 0;
-		border: 1px dotted black !important;
 		width: 50vw;
+		height: 100vh;
+	}
+	.another-image {
+		border-right: 1px dotted black !important;
+	}
+	.spotify {
+		width: 100vw !important;
+		height: 100vh !important;
 	}
 }
 .bottom-container {
