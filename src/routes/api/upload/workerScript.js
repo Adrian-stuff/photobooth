@@ -143,8 +143,6 @@ export function generateStillVideo(code) {
 				'30',
 				'-i',
 				`static/uploads/${code}/image.png`, // Input video 0
-				'-vf',
-				'scale=1488:1050:force_original_aspect_ratio=decrease,pad=1488:1050:(ow-iw)/2:(oh-ih)/2,setsar=1',
 				'-c:v',
 				'libx264',
 				'-t',
@@ -186,7 +184,7 @@ export function generateStillVideo(code) {
 	const uuid = workerData.uuid;
 	const frameSpotifyData = workerData.frameSpotifyData;
 	console.log('frame', workerData);
-	if (frameData.useDiff) {
+	if (frameData.useDiff === true) {
 		await parentPort?.postMessage('done');
 		return;
 	}

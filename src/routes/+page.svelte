@@ -14,12 +14,16 @@
 		loading = true;
 		const storage = getStorage(app);
 		try {
-			videoDownloadURL = await getDownloadURL(ref(storage, `uploads/${code}/final.mp4`));
 			imageDownloadURL = await getDownloadURL(ref(storage, `uploads/${code}/image.png`));
 		} catch (errorMsg) {
 			console.log('error getting downloadURL');
 			error = 'Invalid Code';
 		}
+		getDownloadURL(ref(storage, `uploads/${code}/final.mp4`))
+			.then((val) => {
+				videoDownloadURL = val;
+			})
+			.catch((e) => console.log(e));
 		code = '';
 		loading = false;
 	}
@@ -44,10 +48,12 @@
 			<!-- content here -->
 			<div class="output-container">
 				<img src={imageDownloadURL} alt="preview" />
-				<button>Download Image</button>
+				<button><a href={imageDownloadURL}>Download Image</a></button>
 				<!-- svelte-ignore a11y-media-has-caption -->
-				<video src={videoDownloadURL} autoplay loop></video>
-				<button>Download Video</button>
+				{#if videoDownloadURL}
+					<video src={videoDownloadURL} autoplay loop></video>
+					<button><a href={videoDownloadURL}>Download Video</a></button>
+				{/if}
 			</div>
 		{/if}
 		{#if error}
