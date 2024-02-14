@@ -83,7 +83,7 @@ button:focus-visible {
 	display: flex;
 }
 .webcam > video {
-	height: 100vh;
+	height: 50vh;
 }
 .images {
 	display: flex;

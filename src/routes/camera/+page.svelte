@@ -19,7 +19,7 @@
 	let finalImage = writable('');
 	let isRunning = false;
 	let ffmpeg: FFmpeg;
-	let frameType = 'frame-2';
+	let frameType = 'korean-2';
 	let frame1Type = '1';
 	let frame2Type = '2';
 	let frames: number;
@@ -27,6 +27,11 @@
 	let frameSelection = Object.keys(framesInfo);
 	let frameSpotifySelection = Object.keys(
 		framesInfo['spotify'].frameTypes !== undefined ? framesInfo['spotify'].frameTypes : ''
+	);
+	let frameLandscapeSelection = Object.keys(
+		framesInfo['single-hvd-blue'].frameTypes !== undefined
+			? framesInfo['single-hvd-blue'].frameTypes
+			: ''
 	);
 	// $: imageGenerated = $finalImage;
 	if (browser) {
@@ -40,12 +45,12 @@
 
 	videosBlobArray.subscribe((val) => {
 		console.log('blob Array', val);
-		if ($videosBlobArray.length === frames) {
-			generateImage();
-		}
 	});
 	imagesFilesArray.subscribe((val) => {
 		console.log('file image Array', val);
+		if (val.length === frames) {
+			generateImage();
+		}
 	});
 	imagesBlobArray.subscribe((val) => {
 		console.log('image blob', val);
@@ -70,6 +75,8 @@
 		});
 	}
 	function resetArrays() {
+		$imagesFilesArray = [];
+
 		$imagesBlobArray = [];
 		$videosBlobArray = [];
 		previewImage = '';
@@ -108,10 +115,14 @@
 		for (let index = 0; index < $imagesBlobArray.length; index++) {
 			imageArgs.push(`-i`);
 			imageArgs.push(`${index}.png`);
-			await ffmpeg.writeFile(`${index}.png`, await fetchFile($imagesBlobArray[index]));
-			scaleArgs.push(
-				`[${index + increment}:v]scale=${frameData.width}:${frameData.height}[v${index + increment}];`
-			);
+			console.log($imagesBlobArray.length);
+			await ffmpeg
+				.writeFile(`${index}.png`, await fetchFile($imagesBlobArray[index]))
+				.then((val) => {
+					scaleArgs.push(
+						`[${index + increment}:v]scale=${frameData.width}:${frameData.height}[v${index + increment}];`
+					);
+				});
 		}
 		// ...(frameData.useDiff ? ['frame1.png', '-i', 'frame2.png'] : ['frame.png']), // Input background image
 		await ffmpeg.exec([
@@ -134,12 +145,41 @@
 					.join(';') +
 				(frameData.useDiff
 					? `;[v7][0:v]overlay=x=0:y=0[v8];[v8][1:v]overlay=x=744:y=0[v10]`
-					: `;[v7][0:v]overlay=x=0:y=0[v10]`),
+					: `;[v${frameData.frames + 4}][0:v]overlay=x=0:y=0[v10]`),
 			'-map',
 			'[v10]', // Map the final overlay stream
 			'-y',
 			'out.png' // Output PNG file
 		]);
+		console.log(
+			'command',
+			[
+				'-i',
+				...(frameData.useDiff ? ['frame1.png', '-i', 'frame2.png'] : ['frame.png']), // Input background image
+
+				...imageArgs,
+				'-filter_complex',
+				scaleArgs.join('') +
+					`[${frameData.useDiff ? 'v0' : '0:v'}][v${increment}]overlay=x=${frameData.coordinates[0].x}:y=${frameData.coordinates[0].y}[v5]` +
+					// `[v4][v2]overlay=x=${frameData.coordinates[1].x}:y=${frameData.coordinates[1].y}[v5];` +
+					// `[v5][v3]overlay=x=${frameData.coordinates[2].x}:y=${frameData.coordinates[2].y}[v6];` +
+					frameData.coordinates
+						.map((coord, i) => {
+							if (i === 0) {
+								return;
+							}
+							return `[v${i + 4}][v${i + increment}]overlay=x=${coord.x}:y=${coord.y}[v${i + 4 + increment}]`;
+						})
+						.join(';') +
+					(frameData.useDiff
+						? `;[v7][0:v]overlay=x=0:y=0[v8];[v8][1:v]overlay=x=744:y=0[v10]`
+						: `;[v7][0:v]overlay=x=0:y=0[v10]`),
+				'-map',
+				'[v10]', // Map the final overlay stream
+				'-y',
+				'out.png' // Output PNG file
+			].join(' ')
+		);
 		const data: any = await ffmpeg.readFile(`out.png`);
 
 		const url = URL.createObjectURL(new Blob([data.buffer], { type: 'image/png' }));
@@ -262,6 +302,24 @@
 					</select>
 					<select bind:value={frame2Type}>
 						{#each frameSpotifySelection as spotifyFrameStyle}
+							<option value={spotifyFrameStyle}>
+								{spotifyFrameStyle}
+							</option>
+						{/each}
+					</select>
+				</div>
+			{/if}
+			{#if frameType.includes('single')}
+				<div>
+					<select bind:value={frame1Type}>
+						{#each frameLandscapeSelection as spotifyFrameStyle}
+							<option value={spotifyFrameStyle}>
+								{spotifyFrameStyle}
+							</option>
+						{/each}
+					</select>
+					<select bind:value={frame2Type}>
+						{#each frameLandscapeSelection as spotifyFrameStyle}
 							<option value={spotifyFrameStyle}>
 								{spotifyFrameStyle}
 							</option>

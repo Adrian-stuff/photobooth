@@ -5,6 +5,8 @@ export interface FrameType {
   width: number
   height: number
   useDiff: boolean
+  // isCropped: boolean
+  // cropCoordinates: 
   frameTypes?: SpotifyType
   coordinates: { x: number, y: number }[]
 }
@@ -15,53 +17,179 @@ interface FrameInfo {
   [key: string]: FrameType;
 }
 export const framesInfo: FrameInfo = {
-  "frame-1": {
+  "korean-1": {
     frames: 3,
     frameUrl: `frames/1.png`,
     useDiff: false,
     width: -1,
-    height: 424,
-    coordinates: [
-      { x: 67, y: 358 },
-      { x: 67, y: 849 },
-      { x: 67, y: 1340 }
-    ],
-
-  },
-  "frame-2": {
-    frames: 3,
-    frameUrl: `frames/1.png`,
-    useDiff: false,
-    width: -1,
-    height: 424,
+    height: 430,
     coordinates: [
       { x: 13, y: 90 },
       { x: 13, y: 550 },
       { x: 13, y: 1013 }
     ]
   },
-  "frame-3": {
+  "korean-2": {
     frames: 3,
     frameUrl: `frames/2.png`,
     useDiff: false,
     width: -1,
-    height: 424,
+    height: 430,
     coordinates: [
       { x: 13, y: 90 },
       { x: 13, y: 550 },
       { x: 13, y: 1013 }
     ]
   },
-  "frame-4": {
+  "korean-3": {
     frames: 3,
     frameUrl: `frames/3.png`,
     useDiff: false,
     width: -1,
-    height: 424,
+    height: 430,
     coordinates: [
       { x: 13, y: 90 },
       { x: 13, y: 550 },
       { x: 13, y: 1013 }
+    ]
+  },
+  "hvd-black-vertical": {
+    frames: 3,
+    frameUrl: `frames/jirah/vertical/hvd black vertical.png`,
+    useDiff: false,
+    width: -1,
+    height: 417,
+    coordinates: [
+      { x: 73, y: 328 },
+      { x: 73, y: 765 },
+      { x: 73, y: 1199 }
+    ]
+  },
+  "hvd-white-vertical": {
+    frames: 3,
+    frameUrl: `frames/jirah/vertical/hvd white vertical.png`,
+    useDiff: false,
+    width: -1,
+    height: 417,
+    coordinates: [
+      { x: 73, y: 316 },
+      { x: 73, y: 753 },
+      { x: 73, y: 1192 }
+    ]
+  },
+  // "landscape-black-1": { //TODO:
+  //   frames: 2,
+  //   frameUrl: `frames/jirah/landscape/black bg.png`,
+  //   useDiff: false,
+  //   width: -1,
+  //   height: 695,
+  //   coordinates: [
+  //     { x: -100, y: 55 },
+  //     { x: 492, y: 55 },
+  //   ]
+  // },
+  // "landscape-2": {
+  //   frames: 2,
+  //   frameUrl: `frames/jirah/landscape/heart black bg.png`,
+  //   useDiff: false,
+  //   width: -1,
+  //   height: 424,
+  //   coordinates: [
+  //     { x: 45, y: 58 },
+  //     { x: 627, y: 58 },
+  //   ]
+  // },
+  // "landscape-3": {
+  //   frames: 2,
+  //   frameUrl: `frames/jirah/landscape/heart white bg.png`,
+  //   useDiff: false,
+  //   width: -1,
+  //   height: 424,
+  //   coordinates: [
+  //     { x: 45, y: 58 },
+  //     { x: 627, y: 58 },
+  //   ]
+  // },
+  // "landscape-4": {
+  //   frames: 2,
+  //   frameUrl: `frames/jirah/landscape/instagram.png`,
+  //   useDiff: false,
+  //   width: -1,
+  //   height: 424,
+  //   coordinates: [
+  //     { x: 45, y: 58 },
+  //     { x: 627, y: 58 },
+  //   ]
+  // },
+  // "landscape-5": {
+  //   frames: 2,
+  //   frameUrl: `frames/jirah/landscape/white bg.png`,
+  //   useDiff: false,
+  //   width: -1,
+  //   height: 424,
+  //   coordinates: [
+  //     { x: 45, y: 58 },
+  //     { x: 627, y: 58 },
+  //   ]
+  // },
+  "pink-heart": {
+    frames: 1,
+    frameUrl: `frames/jirah/single/pink heart.png`,
+    useDiff: false,
+    width: -1,
+    height: 837,
+    coordinates: [
+      { x: -200, y: 77 },
+    ]
+  },
+  "single-polaroid-black": {
+    frames: 1,
+    frameUrl: `frames/jirah/single/single polaroid black.png`,
+    useDiff: false,
+    width: -1,
+    height: 837,
+    coordinates: [
+      { x: -200, y: 26 },
+    ]
+  },
+  "single-polaroid-white": {
+    frames: 1,
+    frameUrl: `frames/jirah/single/single polaroid white.png`,
+    useDiff: false,
+    width: -1,
+    height: 839,
+    coordinates: [
+      { x: -200, y: 25 },
+    ]
+  },
+  "single-hvd-pink": {
+    frames: 1,
+    frameUrl: `frames/jirah/single/single hvd pink.png`,
+    useDiff: false,
+    width: -1,
+    height: 640,
+    coordinates: [
+      { x: -30, y: 303 },
+    ]
+  },
+  "single-hvd-lightpink": {
+    frames: 1,
+    frameUrl: `frames/jirah/single/single hvd lightpink.png`,
+    useDiff: false,
+    width: -1,
+    height: 640,
+    coordinates: [
+      { x: -30, y: 264 },
+    ]
+  },
+  "single-hvd-blue": {
+    frames: 1,
+    frameUrl: `frames/jirah/single/single hvd blue.png`,
+    useDiff: false,
+    width: -1,
+    height: 640,
+    coordinates: [
+      { x: -30, y: 303 },
     ]
   },
   "spotify": {
@@ -72,15 +200,39 @@ export const framesInfo: FrameInfo = {
       "pasilyo": {
         frameUrl: `frames/spotify/pasilyo.png`,
       },
-      "until": {
-        frameUrl: `frames/spotify/until.png`,
+      "until i found you": {
+        frameUrl: `frames/spotify/until i found you.png`,
+      },
+      "always": {
+        frameUrl: "frames/spotify/always.png"
+      },
+      "fallen": {
+        frameUrl: "frames/spotify/fallen.png"
+      },
+      "love": {
+        frameUrl: "frames/spotify/love.png"
+      },
+      "lover": {
+        frameUrl: "frames/spotify/lover.png"
+      },
+      "my love my all mine": {
+        frameUrl: "frames/spotify/my love mine all mine.png",
+      },
+      "valentine": {
+        frameUrl: "frames/spotify/valentine.png"
+      },
+      "we fell in love in october": {
+        frameUrl: "frames/spotify/we fell in love in october.png"
+      },
+      "when i met you": {
+        frameUrl: "frames/spotify/when i met you.png"
       }
     },
     width: -1,
     height: 578,
     coordinates: [
-      { x: 65, y: 112 },
-      { x: 65 + 744, y: 112 },
+      { x: 20, y: 112 },
+      { x: 20 + 744, y: 112 },
     ]
   },
 }
@@ -109,7 +261,9 @@ export async function blobToBase64(blob: Blob) {
     };
     reader.readAsDataURL(blob);
   });
-} export async function blobUrlToBuffer(blobUrl: string): Promise<Buffer> {
+}
+
+export async function blobUrlToBuffer(blobUrl: string): Promise<Buffer> {
   const response = await fetch(blobUrl);
   const blobData = await response.blob();
 

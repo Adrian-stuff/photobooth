@@ -9,6 +9,7 @@
 	let loading = false;
 	async function onSubmit() {
 		if (code.length !== 6) return;
+		code = code.toLowerCase();
 		console.log(code);
 		error = '';
 		loading = true;

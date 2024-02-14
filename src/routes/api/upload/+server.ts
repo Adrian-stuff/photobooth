@@ -12,10 +12,12 @@ function runWorkerThread(image: File, imagesArray: File[], videosArray: File[], 
     worker.on('message', async (message) => {
       try {
         const imageFile = new Blob([await readFile(`static/uploads/${uuid}/image.png`)])
-        const videoFile = new Blob([await readFile(`static/uploads/${uuid}/final.mp4`)])
+        if (!frameData.useDiff) {
+          const videoFile = new Blob([await readFile(`static/uploads/${uuid}/final.mp4`)])
+          await uploadFile(uuid, "final.mp4", videoFile)
+        }
 
         await uploadFile(uuid, "image.png", imageFile)
-        await uploadFile(uuid, "final.mp4", videoFile)
       } catch (error) {
         await db.push(`/failed[]`, uuid, true)
         console.log(`image ${uuid} did not upload`)

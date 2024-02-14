@@ -73,10 +73,12 @@
 	});
 </script>
 
+<!-- 640x480 -->
 <video bind:this={video} playsinline autoplay muted></video>
 
 <style>
 	video {
-		transform: rotateY(180deg);
+		/* transform: rotateY(180deg); */
+		/* height: 250px */
 	}
 </style>
